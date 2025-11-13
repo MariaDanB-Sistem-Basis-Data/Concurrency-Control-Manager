@@ -1,11 +1,11 @@
 import random
 import time
 
-from model.Transaction import Transaction
-from model.Response import Response
-from model.Enums import Action, TransactionStatus
-from model.DeadlockDetector import DeadlockDetector
-from model.LockManager import LockManager
+from ccm_model.Transaction import Transaction
+from ccm_model.Response import Response
+from ccm_model.Enums import Action, TransactionStatus
+from ccm_model.DeadlockDetector import DeadlockDetector
+from ccm_model.LockManager import LockManager
 
 # sementara
 class Row:

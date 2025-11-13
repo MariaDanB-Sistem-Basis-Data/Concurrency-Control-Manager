@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from typing import Set
 
-from model.Enums import TransactionStatus
+from ccm_model.Enums import TransactionStatus
 
 
 @dataclass

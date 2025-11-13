@@ -1,5 +1,5 @@
-from helper.Operation import Operation
-from helper.Resource import Resource
+from ccm_helper.Operation import Operation
+from ccm_helper.Resource import Resource
 class LockManager:
 	def __init__(self):
 		self.resources: dict[str, Resource] = {}

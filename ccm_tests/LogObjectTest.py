@@ -1,6 +1,6 @@
 # from ConcurrencyControlManager import log_object
-from helper.Operation import Operation
-from model.LockManager import LockManager
+from ccm_helper.Operation import Operation
+from ccm_model.LockManager import LockManager
 
 def run_log_object_tests():
     lm = LockManager()

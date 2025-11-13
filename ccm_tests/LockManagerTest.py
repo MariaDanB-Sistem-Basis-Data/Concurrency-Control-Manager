@@ -1,5 +1,5 @@
-from model.LockManager import LockManager
-from helper.Operation import Operation
+from ccm_model.LockManager import LockManager
+from ccm_helper.Operation import Operation
 
 
 def run_lock_manager_tests():
