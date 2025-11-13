@@ -6,6 +6,7 @@ class DeadlockDetector:
         print("Deadlock Detector")
     
     def add_wait_edge(self, from_trx, to_trx):
+        # menambahkan node pada graph
         if from_trx == to_trx:
             return 
         
@@ -13,10 +14,12 @@ class DeadlockDetector:
         self.graph.setdefault(to_trx, set())
 
     def remove_add_edge(self, from_tx, to_tx):
+        # menghapus node pada graph
         if from_tx in self.graph:
             self.graph[from_tx].discard(to_tx)
 
     def _find_cycles(self):
+        # mencari cycle yang ada pada graph
         visited = set()
         stack = []
         onstack = set()
