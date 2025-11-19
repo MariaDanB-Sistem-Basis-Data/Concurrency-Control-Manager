@@ -6,7 +6,7 @@ from ccm_model.Response import Response
 from ccm_model.Enums import Action, TransactionStatus
 from ccm_model.DeadlockDetector import DeadlockDetector
 from ccm_model.LockManager import LockManager
-
+from ccm_model.TransactionManager import TransactionManager
 # sementara
 class Row:
     def __init__(self, name: str):
@@ -14,7 +14,7 @@ class Row:
 
 class ConcurrencyControlManager:
     def __init__(self):
-        self.transaction_table: dict[int, Transaction] = {}
+        self.transaction_manager = TransactionManager()
         self.lock_table: dict[int, Transaction] = {}
         self.deadlock_detector: DeadlockDetector = DeadlockDetector()
         self.lock_manager: LockManager = LockManager()
