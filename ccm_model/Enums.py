@@ -7,6 +7,7 @@ class TransactionStatus(Enum):
     COMMITTED = auto()
     FAILED = auto()
     ABORTED = auto()
+    TERMINATED = auto()
 
 class Action(Enum):
     READ = auto()

@@ -9,8 +9,8 @@ from ccm_model.Enums import TransactionStatus
 class Transaction:
     transaction_id: int
     status: TransactionStatus
-    write_set: list[str] = field(default_factory=set)
-    read_set: list[str] = field(default_factory=set)
+    write_set: list[str] = field(default_factory=list)
+    read_set: list[str] = field(default_factory=list)
     start_time: datetime = None
     last_access_time: datetime = None
     

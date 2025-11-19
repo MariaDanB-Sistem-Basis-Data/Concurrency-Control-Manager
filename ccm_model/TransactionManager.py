@@ -38,6 +38,14 @@ class TransactionManager:
             if not transaction.can_be_aborted():
                 return False
             transaction.status = TransactionStatus.ABORTED
+            print(f"Transaction {transactionId} is {transaction.status.name}.")
+            return True
+    
+    def terminate_transaction(self, transactionId: int) -> bool:
+        if (self.has_transaction(transactionId)):
+            transaction =  self.get_transaction(transactionId)
+            transaction.status = TransactionStatus.TERMINATED
+            print(f"Transaction {transactionId} is {transaction.status.name}.")
             return True
 
     def remove_transaction(self, transactionId: int) -> bool:

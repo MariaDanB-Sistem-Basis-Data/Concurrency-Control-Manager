@@ -16,11 +16,12 @@ class Row:
 class ConcurrencyControlManager:
     def __init__(self):
         self.transaction_manager = TransactionManager()
-        self.concurrency_method = ConcurrencyMethod()  
+        self.concurrency_method = None
         
     def set_method(self, method: ConcurrencyMethod):
         """Ganti algoritma concurrency control secara dinamis."""
         self.concurrency_method = method
+        method.set_transaction_manager(self.transaction_manager)
 
     def begin_transaction(self) -> int:
         """Memulai transaksi baru dan mengembalikan transaction_id."""
@@ -33,6 +34,24 @@ class ConcurrencyControlManager:
         self.transaction_manager.begin_transaction(transaction_id)
 
         return transaction_id
+    
+    def log_object(self, obj, transaction_id: int) -> None:
+        """Forward ke concurrency method."""
+        if not self.concurrency_method:
+            raise RuntimeError("Concurrency method belum diset!")
+        return self.concurrency_method.log_object(obj, transaction_id)
+    
+    def validate_object(self, obj, transaction_id: int, action):
+        """Forward ke concurrency method."""
+        if not self.concurrency_method:
+            raise RuntimeError("Concurrency method belum diset!")
+        return self.concurrency_method.validate_object(obj, transaction_id, action)
+
+    def end_transaction(self, transaction_id: int):
+        """Forward ke concurrency method."""
+        if not self.concurrency_method:
+            raise RuntimeError("Concurrency method belum diset!")
+        return self.concurrency_method.end_transaction(transaction_id)
 
     def commit_transaction(self, transaction_id: int) -> None:
         """Melakukan commit terhadap transaksi (write data ke log / storage)."""

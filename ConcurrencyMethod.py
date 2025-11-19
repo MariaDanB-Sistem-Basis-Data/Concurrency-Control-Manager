@@ -1,15 +1,20 @@
-class ConcurrencyMethod:
-    def __init__(self):
+from abc import ABC, abstractmethod
+from ccm_model.Response import Response
+
+class ConcurrencyMethod(ABC):
+
+    @abstractmethod
+    def set_transaction_manager(self, transaction_manager) -> None:
         pass
     
-    def log_object(self, object, transaction_id: int) -> None:
-        """Mencatat objek yang diakses oleh transaksi."""
+    @abstractmethod
+    def log_object(self, obj, transaction_id: int) -> None:
         pass
-    
-    def validate_object(self, object, transaction_id: int, action) -> 'Response':
-        """Memvalidasi apakah transaksi boleh melakukan aksi tertentu pada objek."""
+
+    @abstractmethod
+    def validate_object(self, obj, transaction_id: int, action) -> Response:
         pass
-    
-    def end_transaction(self, transaction_id: int) -> None:
-        """Mengakhiri transaksi."""
+
+    @abstractmethod
+    def end_transaction(self, transaction_id: int) -> Response:
         pass

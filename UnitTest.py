@@ -11,5 +11,5 @@ if __name__ == '__main__':
 	# run_begin_transaction_tests()
 	run_transaction_tests()
 	run_transaction_manager_tests()
-	run_concurrency_control_manager_tests()
 	run_two_phase_locking_tests()
+	run_concurrency_control_manager_tests()

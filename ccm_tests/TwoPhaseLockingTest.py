@@ -16,8 +16,12 @@ def run_two_phase_locking_tests():
     t1 = tpl.transaction_manager.get_transaction(1)
     t2 = tpl.transaction_manager.get_transaction(2)
 
-    rowA = Row("A")
-    rowA.resource_key = "A"  
+    rowA = Row(
+        table_name="A", 
+        pk_value=1, 
+        data={"x": 10}, 
+        version=[0]
+    )
 
     # T1 read A (shared lock)
     resp1 = tpl.validate_object(rowA, 1, Action.READ)
