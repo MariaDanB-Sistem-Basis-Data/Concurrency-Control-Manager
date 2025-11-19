@@ -1,7 +1,7 @@
 from enum import Enum, auto
 
 
-class TransactionState(Enum):
+class TransactionStatus(Enum):
     ACTIVE = auto()
     PARTIALLY_COMMITTED = auto()
     COMMITTED = auto()
