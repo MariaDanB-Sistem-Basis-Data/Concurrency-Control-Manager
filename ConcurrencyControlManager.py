@@ -27,7 +27,7 @@ class ConcurrencyControlManager:
         """Memulai transaksi baru dan mengembalikan transaction_id."""
         print("[CCM] Begin transaction called")
 
-        transaction_id = random.randint(1, 100)
+        transaction_id = random.randint(1, 100) # ini harusnya pakai UUID gaksih?
         while self.transaction_manager.has_transaction(transaction_id):
             transaction_id = random.randint(1, 100)
 
