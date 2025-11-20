@@ -1,7 +1,7 @@
 import random
 import time
 
-from ConcurrencyMethod import ConcurrencyMethod
+from ccm_methods.ConcurrencyMethod import ConcurrencyMethod
 from ccm_helper.Operation import Operation
 from ccm_model.Transaction import Transaction
 from ccm_model.Response import Response
@@ -44,50 +44,44 @@ class TwoPhaseLocking(ConcurrencyMethod):
         op_type = "R" if action == Action.READ else "W"
         operation = Operation(transaction_id, op_type, resource_id)
 
-        success = self.lock_manager.request_lock(operation)
+        result = self.lock_manager.request_lock(op, return_lock_holders=True)
 
-        # masukkin ke set untuk write atau read
+        if isinstance(result, tuple):
+            success, lock_holders = result
+        else:
+            success = result
+            lock_holders = set()
+            
         if success:
-            if action == Action.READ:
-                transaction.read_set.append(resource_id)
+            print(f"[VALID] {action.name} pada {resource_id} berhasil divalidasi")
+            return Response(True, ...)
+        else:
+            for h in lock_holders:
+                self.deadlock_detector.add_wait_edge(transaction_id, h)
+
+            has_dl, cycle = self.deadlock_detector.check_deadlock()
+            if has_dl:
+                victim = self.pick_victim(cycle) 
+                print(f"[DEADLOCK] Victim: T{victim}")
+                self.abort_transaction(victim)
+                return Response(False, f"Deadlock. Victim T{victim} di-abort.")
+
+            # klo bukan deadlock, wound-wait
+            wait = False
+            for h in lock_holders:
+                if self.transaction_manager.get_transaction(transaction_id).get_start_time() < self.transaction_manager.get_transaction(h).get_start_time():
+                    wait = True
+                    break 
+            if wait: 
+                print(f"[WAIT] T{transaction_id} menunggu lock dari {lock_holders}")
+                return Response(False, f"T{transaction_id} harus menunggu {lock_holders}")
             else:
-                transaction.write_set.append(resource_id)
+                print(f"[WOUND] T{transaction_id} membunuh {lock_holders}")
+                for h in lock_holders:
+                    self.transaction_manager.abort_transaction(h)
+                    self.lock_manager.release_locks(transaction_id)
+                return Response(False, f"{lock_holders} di abort karena T{transaction_id} adalah transaksi yang lebih tua.")
 
-            print(f"[2PL] LOCK diberikan {op_type} {resource_id} untuk T{transaction_id}")
-            return Response(True, f"{action.name} pada {resource_id} diizinkan.")
-
-        holder = None
-        for res in self.lock_manager.resources.values():
-            if res.resourceName == resource_id and res.lockedBy:
-                holder = next(iter(res.lockedBy))
-                break
-
-        if holder is None:
-            return Response(False, f"Lock gagal untuk {resource_id}")
-
-        self.deadlock_detector.add_wait_edge(transaction_id, holder)
-
-        deadlock, cycle = self.deadlock_detector.check_deadlock()
-        
-        # kalau deadlock pilih victim terus abort
-        if deadlock:
-            flat = []
-            for x in cycle:
-                if isinstance(x, list):
-                    flat.extend(x)
-                else:
-                    flat.append(x)
-
-            victim = flat[-1] 
-            print(f"[DEADLOCK] Victim = T{victim}")
-
-            self.transaction_manager.abort_transaction(victim)
-            self.lock_manager.release_locks(victim)
-
-            return Response(False, f"Deadlock terdeteksi. T{victim} di-abort.")
-
-        print(f"[WAIT] T{transaction_id} menunggu lock {resource_id} milik T{holder}")
-        return Response(False, f"T{transaction_id} harus menunggu {resource_id}.")
 
     def end_transaction(self, transaction_id: int) -> None:
         """Mengakhiri transaksi."""
@@ -110,3 +104,16 @@ class TwoPhaseLocking(ConcurrencyMethod):
 
         return Response(True, f"Transaksi {transaction_id} berakhir (status={transaction.status.name}).")
             
+    def pick_victim(self, cycle):
+        # yg paling muda
+        victim = None
+        max_start_time = -1
+        
+        for tid in cycle:
+            trx = self.transaction_manager.get_transaction(tid)
+            if trx.get_start_time() > max_start_time:
+                max_start_time = trx.get_start_time()
+                victim = trx
+
+        return victim
+
