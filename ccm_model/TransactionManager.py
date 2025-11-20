@@ -8,7 +8,7 @@ from ccm_model.Transaction import Transaction
 class TransactionManager:
     transactions: dict[int, 'Transaction'] = None
     initialized: bool = False
-    next_tid: int = 0
+    next_tid: int = 1
     
     def __post_init__(self):
         if self.transactions is None:
@@ -28,38 +28,38 @@ class TransactionManager:
         self.next_tid += 1
         return tid
     
-    def get_transaction(self, transactionId: int) -> Transaction:
-        if transactionId in self.transactions:
-            return self.transactions[transactionId]
+    def get_transaction(self, transaction_id: int) -> Transaction:
+        if transaction_id in self.transactions:
+            return self.transactions[transaction_id]
 
-    def has_transaction(self, transactionId: int) -> bool:
-        return transactionId in self.transactions
-
-    def commit_transaction(self, transactionId: int) -> bool:
-        if (self.has_transaction(transactionId)):
-            transaction =  self.get_transaction(transactionId)
+    def has_transaction(self, transaction_id: int) -> bool:
+        return transaction_id in self.transactions
+    
+    def commit_transaction(self, transaction_id: int) -> bool:
+        if (self.has_transaction(transaction_id)):
+            transaction =  self.get_transaction(transaction_id)
             transaction.status = TransactionStatus.COMMITTED
             return True
 
-    def abort_transaction(self, transactionId: int) -> bool:
-        if (self.has_transaction(transactionId)):
-            transaction =  self.get_transaction(transactionId)
+    def abort_transaction(self, transaction_id: int) -> bool:
+        if (self.has_transaction(transaction_id)):
+            transaction =  self.get_transaction(transaction_id)
             if not transaction.can_be_aborted():
                 return False
             transaction.status = TransactionStatus.ABORTED
-            print(f"Transaction {transactionId} is {transaction.status.name}.")
+            print(f"Transaction {transaction_id} is {transaction.status.name}.")
             return True
     
-    def terminate_transaction(self, transactionId: int) -> bool:
-        if (self.has_transaction(transactionId)):
-            transaction =  self.get_transaction(transactionId)
+    def terminate_transaction(self, transaction_id: int) -> bool:
+        if (self.has_transaction(transaction_id)):
+            transaction =  self.get_transaction(transaction_id)
             transaction.status = TransactionStatus.TERMINATED
-            print(f"Transaction {transactionId} is {transaction.status.name}.")
+            print(f"Transaction {transaction_id} is {transaction.status.name}.")
             return True
 
-    def remove_transaction(self, transactionId: int) -> bool:
-        if self.has_transaction(transactionId):
-            del self.transactions[transactionId]
+    def remove_transaction(self, transaction_id: int) -> bool:
+        if self.has_transaction(transaction_id):
+            del self.transactions[transaction_id]
             return True
     
     def get_active_transactions(self) -> list[Transaction]:
