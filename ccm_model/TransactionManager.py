@@ -29,7 +29,7 @@ class TransactionManager:
         return tid
     
     def get_transaction(self, transaction_id: int) -> Transaction:
-        if transaction_id in self.transactions:
+        if self.has_transaction(transaction_id):
             return self.transactions[transaction_id]
 
     def has_transaction(self, transaction_id: int) -> bool:
