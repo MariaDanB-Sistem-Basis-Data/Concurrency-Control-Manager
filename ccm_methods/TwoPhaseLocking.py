@@ -44,13 +44,7 @@ class TwoPhaseLocking(ConcurrencyMethod):
         op_type = "R" if action == Action.READ else "W"
         operation = Operation(transaction_id, op_type, resource_id)
 
-        result = self.lock_manager.request_lock(op, return_lock_holders=True)
-
-        if isinstance(result, tuple):
-            success, lock_holders = result
-        else:
-            success = result
-            lock_holders = set()
+        success, lock_holders = self.lock_manager.request_lock(operation)
             
         if success:
             print(f"[VALID] {action.name} pada {resource_id} berhasil divalidasi")
