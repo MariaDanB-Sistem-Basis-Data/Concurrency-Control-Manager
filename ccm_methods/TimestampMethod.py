@@ -33,12 +33,11 @@ class TimestampMethod(ConcurrencyMethod):
         resource_id = obj.resource_key
         
         tx_datetime = transaction.get_start_time()
-        tx_timestamp = int(tx_datetime.timestamp() * 1000000)  #ke microsecon
 
         op_type = "read" if action == Action.READ else "write"
         operation = Operation(transaction_id, op_type, resource_id)
 
-        response = self.timestamp_manager.validate_operation(operation, tx_timestamp)
+        response = self.timestamp_manager.validate_operation(operation, tx_datetime)
         
         if response.success:
             print(f"[VALID] {action.name} pada {resource_id} oleh T{transaction_id} berhasil")

@@ -1,12 +1,13 @@
-from typing import Dict, List, Tuple, Optional
+from typing import Dict, List, Tuple, Optional, Union
+from datetime import datetime
 from ccm_helper.Resource import Resource
 from ccm_helper.Operation import Operation
 from ccm_model.Response import Response
 
 class Timestamp:
     def __init__(self):
-        self.read_ts: int = 0
-        self.write_ts: int = 0
+        self.read_ts: Optional[datetime] = None
+        self.write_ts: Optional[datetime] = None
     
 class TimestampManager:
     def __init__(self):
@@ -17,7 +18,7 @@ class TimestampManager:
             self.timestampTable[object_id] = Timestamp()
         return self.timestampTable[object_id]
 
-    def validate_operation(self, operation: Operation, tx_ts: int) -> Response:
+    def validate_operation(self, operation: Operation, tx_ts: datetime) -> Response:
         timestamp = self.create_timestamp(operation.resource_id)
         action_type = operation.operation_type.lower()
 
@@ -29,17 +30,17 @@ class TimestampManager:
             raise ValueError("Action type harus 'read' atau 'write'")
 
 
-    def check_read(self, timestamp: Timestamp, tx_ts: int) -> Response:
-        if tx_ts < timestamp.write_ts:
+    def check_read(self, timestamp: Timestamp, tx_ts: datetime) -> Response:
+        if timestamp.write_ts is not None and tx_ts < timestamp.write_ts:
             return Response(False, "Read conflict: trying to read a value that has been overwritten by a newer transaction.") 
         
-        timestamp.read_ts = max(timestamp.read_ts, tx_ts)
+        timestamp.read_ts = max(timestamp.read_ts, tx_ts) if timestamp.read_ts else tx_ts
         return Response(True, "Read successful")
     
-    def check_write(self, timestamp: Timestamp, tx_ts: int) -> Response:
-        if tx_ts < timestamp.read_ts:
+    def check_write(self, timestamp: Timestamp, tx_ts: datetime) -> Response:
+        if timestamp.read_ts is not None and tx_ts < timestamp.read_ts:
             return Response(False, "Write conflict: trying to write a value that has been read by a newer transaction.")        
-        if tx_ts < timestamp.write_ts:
+        if timestamp.write_ts is not None and tx_ts < timestamp.write_ts:
             return Response(False, "Write conflict: trying to write a value that has been written by a newer transaction.")
 
         timestamp.write_ts = tx_ts
