@@ -7,7 +7,7 @@ from ccm_tests.TwoPhaseLockingTest import run_two_phase_locking_tests
 from ccm_tests.ValidatorTest import run_validator_tests
 from ccm_tests.TimestampTest import run_timestamp_tests
 from ccm_tests.TimestampMethodTest import run_timestamp_method_tests
-
+from ccm_tests.MultiversionTest import testMultiVersion
 if __name__ == '__main__':
 	# run_lock_manager_tests()
 	# run_log_object_tests()
@@ -19,3 +19,4 @@ if __name__ == '__main__':
 	run_two_phase_locking_tests()
 	run_validator_tests()
 	run_concurrency_control_manager_tests()
+	testMultiVersion()

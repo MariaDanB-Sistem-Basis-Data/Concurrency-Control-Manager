@@ -37,13 +37,11 @@ class Multiversion(ConcurrencyMethod):
         if transaction_id not in self.transaction_timestamps:
             self._timestamp_counter += 1
             self.transaction_timestamps[transaction_id] = self._timestamp_counter
-            print(f"[MVTO] T{transaction_id} assigned timestamp: {self._timestamp_counter}")
         return self.transaction_timestamps[transaction_id]
 
     def log_object(self, obj: Row, transaction_id: int) -> None:
         transaction = self.transaction_manager.get_transaction(transaction_id)
         if not transaction:
-            print(f"ERROR: Transaction {transaction_id} not found for logging.")
             return
         
         if transaction_id not in self.write_sets:
@@ -56,9 +54,7 @@ class Multiversion(ConcurrencyMethod):
         
         result = self._write_version(resource_id, obj.data, tx_timestamp, transaction_id)
         
-        if result.success:
-            print(f"[MVTO LOG] T{transaction_id} logged write to {resource_id}")
-        else:
+        if not result.success:
             print(f"[MVTO LOG] T{transaction_id} write to {resource_id} failed: {result.message}")
 
     def validate_object(self, obj: Row, transaction_id: int, action: Action) -> Response:
@@ -81,8 +77,6 @@ class Multiversion(ConcurrencyMethod):
             # Find version to read
             result = self._read_version(resource_id, tx_timestamp, transaction_id)
             
-            if result.success:
-                print(f"[MVTO READ] T{transaction_id} reads {resource_id} (TS={tx_timestamp})")
             return result
             
         elif action == Action.WRITE:
@@ -94,8 +88,6 @@ class Multiversion(ConcurrencyMethod):
             if not result.success:
                 print(f"[MVTO WRITE] T{transaction_id} write to {resource_id} FAILED - will abort")
                 self.transaction_manager.abort_transaction(transaction_id)
-            else:
-                print(f"[MVTO WRITE] T{transaction_id} writes {resource_id} (TS={tx_timestamp})")
             
             return result
         
@@ -116,7 +108,6 @@ class Multiversion(ConcurrencyMethod):
         
         if tx_timestamp > selected_version.read_timestamp:
             selected_version.read_timestamp = tx_timestamp
-            print(f"[MVTO] Updated R-timestamp of {resource_id} (W-TS={selected_version.write_timestamp}) to {tx_timestamp}")
         
         return Response(True, 
             f"Read successful: T{transaction_id} on {resource_id}, version W-TS={selected_version.write_timestamp}")
@@ -146,13 +137,11 @@ class Multiversion(ConcurrencyMethod):
         if tx_timestamp == selected_version.write_timestamp:
             # Overwrite
             selected_version.value = value
-            print(f"[MVTO] T{transaction_id} overwrites existing version of {resource_id} (TS={tx_timestamp})")
             return Response(True, f"Overwrite successful for T{transaction_id} on {resource_id}")
         
         # TS(T) > W-timestamp(Qi) - Create new version
         new_version = DataVersion(value, tx_timestamp, tx_timestamp)
         self.versions[resource_id].insert(selected_index, new_version)
-        print(f"[MVTO] T{transaction_id} creates new version of {resource_id} (W-TS={tx_timestamp})")
         
         return Response(True, f"New version created for T{transaction_id} on {resource_id}")
 
@@ -161,7 +150,6 @@ class Multiversion(ConcurrencyMethod):
         if not transaction:
             return Response(False, f"Transaction {transaction_id} not found.")
         
-        print(f"[MVTO] T{transaction_id} ending with status {transaction.status.name}")
         
         self.transaction_manager.terminate_transaction(transaction_id)
         
@@ -173,7 +161,6 @@ class Multiversion(ConcurrencyMethod):
         self.read_sets.pop(transaction_id, None)
         self.write_sets.pop(transaction_id, None)
         self.transaction_timestamps.pop(transaction_id, None)
-        print(f"[MVTO] Cleaned up data for T{transaction_id}")
 
     def get_versions(self, resource_id: str) -> List[DataVersion]:
         return self.versions.get(resource_id, [])
