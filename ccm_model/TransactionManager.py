@@ -3,12 +3,16 @@ from dataclasses import dataclass
 from datetime import datetime
 from ccm_model.Enums import TransactionStatus
 from ccm_model.Transaction import Transaction
+from MariaDanB_API.IFailureRecoveryManager import IFailureRecoveryManager, SupportsRecoveryCriteria, SupportsExecutionResult
 
 @dataclass
 class TransactionManager:
     transactions: dict[int, 'Transaction'] = None
     initialized: bool = False
     next_tid: int = 1
+    # harusnya nanti gini
+    # recovery_manager: Optional[IFailureRecoveryManager] = None
+    # recovery_criteria_factory: Optional[Callable[[int], SupportsRecoveryCriteria]] = None
     
     def __post_init__(self):
         if self.transactions is None:
@@ -47,6 +51,8 @@ class TransactionManager:
             if not transaction.can_be_aborted():
                 return False
             transaction.status = TransactionStatus.ABORTED
+            # NOTES
+            # nanti tiap abort manggil frm.recover(criteria)
             print(f"Transaction {transaction_id} is {transaction.status.name}.")
             return True
     
