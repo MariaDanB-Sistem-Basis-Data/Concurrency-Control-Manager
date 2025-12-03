@@ -1,9 +1,10 @@
 from dataclasses import dataclass
 
 from datetime import datetime
+from ccm_helper.Row import Row
 from ccm_model.Enums import TransactionStatus
 from ccm_model.Transaction import Transaction
-from MariaDanB_API.IFailureRecoveryManager import IFailureRecoveryManager, SupportsRecoveryCriteria, SupportsExecutionResult
+#from MariaDanB_API.IFailureRecoveryManager import IFailureRecoveryManager, SupportsRecoveryCriteria, SupportsExecutionResult
 
 @dataclass
 class TransactionManager:
@@ -61,6 +62,18 @@ class TransactionManager:
             transaction =  self.get_transaction(transaction_id)
             transaction.status = TransactionStatus.TERMINATED
             print(f"Transaction {transaction_id} is {transaction.status.name}.")
+            return True
+        
+    def add_read_set(self, transaction_id: int, obj: Row) -> bool:
+        transaction  = self.get_transaction(transaction_id)
+        if transaction:
+            transaction.read_set.append(obj)
+            return True
+        
+    def add_write_set(self, transaction_id: int, obj: Row) -> bool:
+        transaction  = self.get_transaction(transaction_id)
+        if transaction:
+            transaction.write_set.append(obj)
             return True
 
     def remove_transaction(self, transaction_id: int) -> bool:
